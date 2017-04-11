@@ -4,15 +4,15 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-bitfield',
-    version='1.8.1wf',
-    author='DISQUS',
+    version='1.9.2wf',
+    author='Disqus',
     author_email='opensource@disqus.com',
     url='https://github.com/disqus/django-bitfield',
     description='BitField in Django',
     packages=find_packages(),
     zip_safe=False,
     install_requires=[
-        'Django>=1.4',
+        'Django>=1.4.22',
         'six',
     ],
     setup_requires=[
@@ -32,11 +32,9 @@ setup(
         'Topic :: Software Development',
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.2",
-        "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
     ],
 )

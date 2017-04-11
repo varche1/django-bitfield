@@ -1,32 +1,23 @@
 language: python
-
 python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "3.4"
+- '2.7'
+- '3.4'
+- '3.5'
+install: pip install flake8 tox-travis
 
-env:
-  - DJANGO=1.4.12
-  - DJANGO=1.5.7
-  - DJANGO=1.6.4
-  - DJANGO=1.8.7
-
-matrix:
-  exclude:
-    - python: "3.2"
-      env: DJANGO=1.4.12
-    - python: "3.3"
-      env: DJANGO=1.4.12
-    - python: "3.4"
-      env: DJANGO=1.4.12
+services:
+  - postgresql
 
 before_script:
-  - psql -c 'create database bitfield_test;' -U postgres
+ - psql -c 'create database bitfield;' -U postgres;
 
-install:
-  - pip install Django==$DJANGO
-  - pip install -e .
-
-script: python setup.py test
+script:
+- make lint
+- make test
+deploy:
+  provider: pypi
+  user: disqus
+  password:
+    secure: VMFRRlf1r/rIfHiKbPkKafCUCPMqUmwxKXS02COgj38354YiF5wK1IK89FBd+Jeuym3CL+ZXbsHpjGXV16XxGn3QWknlErLFtrkPykGceQczMYPUAaf4STH5/RMpllGZXzsrIu3miW/xa1fpMhZSdVFSPExgmDrVH0TVfO5m7rM=
+  on:
+    tags: true
