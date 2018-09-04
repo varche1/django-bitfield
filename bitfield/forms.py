@@ -43,11 +43,11 @@ class BitFormField(IntegerField):
 
         if isinstance(kwargs['initial'], int):
             iv = kwargs['initial']
-            l = []
+            li = []
             for i in range(0, min(len(choices), 63)):
                 if (1 << i) & iv > 0:
-                    l += [choices[i][0]]
-            kwargs['initial'] = l
+                    li += [choices[i][0]]
+            kwargs['initial'] = li
         self.widget = widget
         super(BitFormField, self).__init__(widget=widget, *args, **kwargs)
         self.choices = self.widget.choices = choices

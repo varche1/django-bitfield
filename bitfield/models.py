@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import six
+from copy import deepcopy
 
 from django.db.models import signals
 from django.db.models.fields import Field, BigIntegerField
@@ -29,8 +30,16 @@ class BitFieldFlags(object):
 
     def __getattr__(self, key):
         if key not in self._flags:
-            raise AttributeError
+            raise AttributeError("flag {} is not registered".format(key))
         return Bit(self._flags.index(key))
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, deepcopy(v, memo))
+        return result
 
     def iteritems(self):
         for flag in self._flags:
@@ -240,7 +249,11 @@ class CompositeBitField(object):
     def contribute_to_class(self, cls, name):
         self.name = name
         self.model = cls
-        cls._meta.virtual_fields.append(self)
+        # virtual_fields was deprecated in Django 1.10 and removed in 2.0
+        private_fields = getattr(cls._meta, "private_fields", None)
+        if private_fields is None:
+            private_fields = cls._meta.virtual_fields
+        private_fields.append(self)
 
         signals.class_prepared.connect(self.validate_fields, sender=cls)
 
