@@ -2,16 +2,13 @@ from __future__ import absolute_import
 
 from django.forms import CheckboxSelectMultiple, IntegerField, ValidationError
 
-try:
-    from django.utils.encoding import force_text
-except ImportError:
-    from django.utils.encoding import force_unicode as force_text
+from django.utils.encoding import force_text
 
 from bitfield.types import BitHandler
 
 
 class BitFieldCheckboxSelectMultiple(CheckboxSelectMultiple):
-    def render(self, name, value, attrs=None, choices=()):
+    def render(self, name, value, attrs=None, choices=(), renderer=None):
         if isinstance(value, BitHandler):
             value = [k for k, v in value if v]
         elif isinstance(value, int):
@@ -43,11 +40,11 @@ class BitFormField(IntegerField):
 
         if isinstance(kwargs['initial'], int):
             iv = kwargs['initial']
-            li = []
+            iv_list = []
             for i in range(0, min(len(choices), 63)):
                 if (1 << i) & iv > 0:
-                    li += [choices[i][0]]
-            kwargs['initial'] = li
+                    iv_list += [choices[i][0]]
+            kwargs['initial'] = iv_list
         self.widget = widget
         super(BitFormField, self).__init__(widget=widget, *args, **kwargs)
         self.choices = self.widget.choices = choices

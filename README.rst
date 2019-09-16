@@ -13,7 +13,7 @@ Provides a BitField like class (using a BigIntegerField) for your Django models.
 Requirements
 ============
 
-* Django >= 1.4
+* Django >= 1.10.8
 * PostgreSQL (see notes)
 
 **Notes:**
@@ -109,3 +109,12 @@ To use it set ``list_filter`` ModelAdmin option::
 BitFieldListFilter is in ``bitfield.admin`` module::
 
     from bitfield.admin import BitFieldListFilter
+
+Changelog
+=========
+
+Scheduled for 2.0 release:
+
+- Drop support for Django versions below 1.10.
+- Use _meta.private_fields instead of deprecated _meta.virtual_fields in CompositeBitField.
+- Add testing with python 3.6, 3.7 and Django 2.x to travis configuration.
