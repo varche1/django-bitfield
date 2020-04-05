@@ -1,3 +1,10 @@
+clean:
+	rm -fr build/
+	rm -fr dist/
+	rm -fr .eggs/
+	find . -name '*.egg-info' -exec rm -fr {} +
+	find . -name '*.egg' -exec rm -f {} +
+
 develop:
 	@echo "--> Installing dependencies"
 	pip install -e .
@@ -15,7 +22,7 @@ lint:
 	@echo ""
 
 
-publish:
+publish: clean
 	python setup.py sdist
 	twine upload dist/*
 
