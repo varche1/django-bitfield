@@ -8,4 +8,4 @@ from bitfield.models import Bit, BitHandler, CompositeBitField, BitField  # NOQA
 
 default_app_config = 'bitfield.apps.BitFieldAppConfig'
 
-VERSION = '1.9.6+whyfly.1'
+VERSION = '2.0.1+whyfly.1'

@@ -16,6 +16,7 @@ lint:
 
 
 publish:
-	python setup.py sdist bdist_wheel upload
+	python setup.py sdist
+	twine upload dist/*
 
 .PHONY: test publish
