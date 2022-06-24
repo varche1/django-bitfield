@@ -7,7 +7,6 @@ from django.db.models import F
 from django.test import TestCase
 
 from bitfield import BitHandler, Bit, BitField
-from bitfield.compat import bitand, bitor
 
 from .forms import BitFieldTestModelForm
 from .models import BitFieldTestModel, CompositeBitFieldTestModel
@@ -31,7 +30,7 @@ class BitHandlerTest(TestCase):
         self.assertEqual(int(bithandler.FLAG_1.number), 1)
         self.assertEqual(int(bithandler.FLAG_2.number), 2)
         self.assertEqual(int(bithandler.FLAG_3.number), 3)
-        # Negative test non-existant key.
+        # Negative test non-existent key.
         self.assertRaises(AttributeError, lambda: bithandler.FLAG_4)
         # Test bool().
         self.assertEqual(bool(bithandler.FLAG_0), False)
@@ -178,22 +177,44 @@ class BitFieldTest(TestCase):
         self.assertFalse(BitFieldTestModel.objects.exclude(flags=BitFieldTestModel.flags.FLAG_0).exists())
         self.assertFalse(BitFieldTestModel.objects.exclude(flags=BitFieldTestModel.flags.FLAG_1).exists())
 
+    def test_select_complex_expression(self):
+        BitFieldTestModel.objects.create(flags=3)
+        self.assertTrue(BitFieldTestModel.objects.filter(flags=F('flags').bitor(BitFieldTestModel.flags.FLAG_1)).exists())
+        self.assertTrue(BitFieldTestModel.objects.filter(flags=F('flags').bitor(BitFieldTestModel.flags.FLAG_0)).exists())
+        self.assertTrue(BitFieldTestModel.objects.filter(flags=F('flags').bitor(BitFieldTestModel.flags.FLAG_0).bitor(BitFieldTestModel.flags.FLAG_1)).exists())
+        self.assertTrue(BitFieldTestModel.objects.filter(flags=F('flags').bitand(BitFieldTestModel.flags.FLAG_0 | BitFieldTestModel.flags.FLAG_1)).exists())
+        self.assertTrue(BitFieldTestModel.objects.filter(flags=F('flags').bitand(15)).exists())
+        self.assertTrue(BitFieldTestModel.objects.exclude(flags=F('flags').bitand(BitFieldTestModel.flags.FLAG_2)).exists())
+        self.assertTrue(BitFieldTestModel.objects.exclude(flags=F('flags').bitand(BitFieldTestModel.flags.FLAG_3)).exists())
+        self.assertTrue(BitFieldTestModel.objects.exclude(flags=F('flags').bitand(BitFieldTestModel.flags.FLAG_2 | BitFieldTestModel.flags.FLAG_3)).exists())
+        self.assertTrue(BitFieldTestModel.objects.exclude(flags=F('flags').bitand(12)).exists())
+
+        self.assertFalse(BitFieldTestModel.objects.exclude(flags=F('flags').bitor(BitFieldTestModel.flags.FLAG_1)).exists())
+        self.assertFalse(BitFieldTestModel.objects.exclude(flags=F('flags').bitor(BitFieldTestModel.flags.FLAG_0)).exists())
+        self.assertFalse(BitFieldTestModel.objects.exclude(flags=F('flags').bitor(BitFieldTestModel.flags.FLAG_0).bitor(BitFieldTestModel.flags.FLAG_1)).exists())
+        self.assertFalse(BitFieldTestModel.objects.exclude(flags=F('flags').bitand(BitFieldTestModel.flags.FLAG_0 | BitFieldTestModel.flags.FLAG_1)).exists())
+        self.assertFalse(BitFieldTestModel.objects.exclude(flags=F('flags').bitand(15)).exists())
+        self.assertFalse(BitFieldTestModel.objects.filter(flags=F('flags').bitand(BitFieldTestModel.flags.FLAG_2)).exists())
+        self.assertFalse(BitFieldTestModel.objects.filter(flags=F('flags').bitand(BitFieldTestModel.flags.FLAG_3)).exists())
+        self.assertFalse(BitFieldTestModel.objects.filter(flags=F('flags').bitand(BitFieldTestModel.flags.FLAG_2 | BitFieldTestModel.flags.FLAG_3)).exists())
+        self.assertFalse(BitFieldTestModel.objects.filter(flags=F('flags').bitand(12)).exists())
+
     def test_update(self):
         instance = BitFieldTestModel.objects.create(flags=0)
         self.assertFalse(instance.flags.FLAG_0)
 
-        BitFieldTestModel.objects.filter(pk=instance.pk).update(flags=bitor(F('flags'), BitFieldTestModel.flags.FLAG_1))
+        BitFieldTestModel.objects.filter(pk=instance.pk).update(flags=F('flags').bitor(BitFieldTestModel.flags.FLAG_1))
         instance = BitFieldTestModel.objects.get(pk=instance.pk)
         self.assertTrue(instance.flags.FLAG_1)
 
-        BitFieldTestModel.objects.filter(pk=instance.pk).update(flags=bitor(F('flags'), ((~BitFieldTestModel.flags.FLAG_0 | BitFieldTestModel.flags.FLAG_3))))
+        BitFieldTestModel.objects.filter(pk=instance.pk).update(flags=F('flags').bitor(((~BitFieldTestModel.flags.FLAG_0 | BitFieldTestModel.flags.FLAG_3))))
         instance = BitFieldTestModel.objects.get(pk=instance.pk)
         self.assertFalse(instance.flags.FLAG_0)
         self.assertTrue(instance.flags.FLAG_1)
         self.assertTrue(instance.flags.FLAG_3)
         self.assertFalse(BitFieldTestModel.objects.filter(flags=BitFieldTestModel.flags.FLAG_0).exists())
 
-        BitFieldTestModel.objects.filter(pk=instance.pk).update(flags=bitand(F('flags'), ~BitFieldTestModel.flags.FLAG_3))
+        BitFieldTestModel.objects.filter(pk=instance.pk).update(flags=F('flags').bitand(~BitFieldTestModel.flags.FLAG_3))
         instance = BitFieldTestModel.objects.get(pk=instance.pk)
         self.assertFalse(instance.flags.FLAG_0)
         self.assertTrue(instance.flags.FLAG_1)
@@ -205,7 +226,7 @@ class BitFieldTest(TestCase):
 
         instance.flags.FLAG_1 = True
 
-        BitFieldTestModel.objects.filter(pk=instance.pk).update(flags=bitor(F('flags'), instance.flags))
+        BitFieldTestModel.objects.filter(pk=instance.pk).update(flags=F('flags').bitor(instance.flags))
         instance = BitFieldTestModel.objects.get(pk=instance.pk)
         self.assertTrue(instance.flags.FLAG_1)
 

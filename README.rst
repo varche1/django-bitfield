@@ -87,17 +87,19 @@ Enjoy!
 Admin
 =====
 
-To use the widget in the admin, you'll need to update your ModelAdmin. Add the
-following lines to your ModelAdmin::
+To use the widget in the admin, you'll need to import the classes and then update or create
+a ModelAdmin with these formfield_overrides lines in your admin.py::
 
+    from bitfield import BitField
+    from bitfield.forms import BitFieldCheckboxSelectMultiple
+
+    class MyModelAdmin(admin.ModelAdmin):
 	formfield_overrides = {
 		BitField: {'widget': BitFieldCheckboxSelectMultiple},
 	}
+	
+    admin.site.register(MyModel, MyModelAdmin)
 
-Make sure you've imported the classes by adding these lines to the top of the file::
-
-	from bitfield import BitField
-	from bitfield.forms import BitFieldCheckboxSelectMultiple
 
 There is also a ``BitFieldListFilter`` list filter (Django 1.4 or newer).
 To use it set ``list_filter`` ModelAdmin option::
@@ -112,6 +114,13 @@ BitFieldListFilter is in ``bitfield.admin`` module::
 
 Changelog
 =========
+
+2.1.0 - 2020-05-25:
+
+- Add support for Django 3.1, 3.2 (No changes needed).
+- Add support for Python 3.8, 3.9.
+- Fixed multiple bugs with use in the Django admin.
+- Removed dead compatibility code.
 
 2.0.1 - 2020-01-25:
 
